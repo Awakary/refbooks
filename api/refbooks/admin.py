@@ -1,16 +1,16 @@
 from django.contrib import admin
 
-from refbooks.models import ElementRefBook, RefBook, VersionRefBook
+from refbooks.models import ElementRefbook, Refbook, VersionRefbook
 
 
-class VersionRefBookInline(admin.StackedInline):
-    model = VersionRefBook
+class VersionRefbookInline(admin.StackedInline):
+    model = VersionRefbook
 
 
-@admin.register(RefBook)
-class RefBookAdmin(admin.ModelAdmin):
+@admin.register(Refbook)
+class RefbookAdmin(admin.ModelAdmin):
     list_display = ('id', 'code', 'name', 'current_version', 'start_date')
-    inlines = [VersionRefBookInline]
+    inlines = [VersionRefbookInline]
     # @admin.display(description='Дата начала действия версии')
 
     def start_date(self, obj):
@@ -24,14 +24,14 @@ class RefBookAdmin(admin.ModelAdmin):
     current_version.short_description = 'Текущая версия'
 
 
-class ElementRefBookInline(admin.StackedInline):
-    model = ElementRefBook
+class ElementRefbookInline(admin.StackedInline):
+    model = ElementRefbook
 
 
-@admin.register(VersionRefBook)
-class VersionRefBookAdmin(admin.ModelAdmin):
+@admin.register(VersionRefbook)
+class VersionRefbookAdmin(admin.ModelAdmin):
     list_display = ('refbook_code', 'refbook_name', 'number', 'start_date')
-    inlines = [ElementRefBookInline]
+    inlines = [ElementRefbookInline]
 
     def refbook_code(self, obj):
         return obj.refbook.code
@@ -42,7 +42,7 @@ class VersionRefBookAdmin(admin.ModelAdmin):
     refbook_name.short_description = 'Наименование справочника'
 
 
-@admin.register(ElementRefBook)
-class ElementRefBookAdmin(admin.ModelAdmin):
+@admin.register(ElementRefbook)
+class ElementRefbookAdmin(admin.ModelAdmin):
     list_display = ('version', 'code', 'value')
 

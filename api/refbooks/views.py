@@ -5,19 +5,19 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from refbooks.models import ElementRefBook, RefBook
-from refbooks.serializers import ElementRefBookSerializer, RefBookSerializer
+from refbooks.models import ElementRefbook, Refbook
+from refbooks.serializers import ElementRefbookSerializer, RefbookSerializer
 
 
-class RefBookViewSet(ListModelMixin, GenericViewSet):
+class RefbookViewSet(ListModelMixin, GenericViewSet):
 
     def get_queryset(self):
         date_check = self.request.query_params.get('date', None)
 
         if date_check:
-            return RefBook.objects.filter(versions__start_date__lte=date_check).distinct()
-        return RefBook.objects.all()
-    serializer_class = RefBookSerializer
+            return Refbook.objects.filter(versions__start_date__lte=date_check).distinct()
+        return Refbook.objects.all()
+    serializer_class = RefbookSerializer
 
     @swagger_auto_schema(
         manual_parameters=[openapi.Parameter('date',
@@ -31,19 +31,19 @@ class RefBookViewSet(ListModelMixin, GenericViewSet):
         return Response({'refbooks': serializer.data})
 
 
-class ElementRefBookViewSet(ListModelMixin, RetrieveModelMixin,
+class ElementRefbookViewSet(ListModelMixin, RetrieveModelMixin,
                             GenericViewSet):
 
-    queryset = ElementRefBook.objects.all()
-    serializer_class = ElementRefBookSerializer
+    queryset = ElementRefbook.objects.all()
+    serializer_class = ElementRefbookSerializer
 
     def filter_queryset(self, queryset):
         refbook_id = self.kwargs.get('id', None)
         version = self.request.query_params.get('version', None)
-        queryset = ElementRefBook.objects.filter(version__refbook=refbook_id)
+        queryset = ElementRefbook.objects.filter(version__refbook=refbook_id)
         if version:
             return queryset.filter(version__number=version)
-        refbook = RefBook.objects.get(pk=refbook_id)
+        refbook = Refbook.objects.get(pk=refbook_id)
         if not refbook.current_version:
             raise ValueError('Нет текущей версии справочника')
         return queryset.filter(version__number=refbook.current_version.number)
@@ -89,11 +89,16 @@ class ElementRefBookViewSet(ListModelMixin, RetrieveModelMixin,
                            ]
     ))
     def check_element(self, request, *args, **kwargs):
-        code = self.request.query_params.get('code', None)
-        value = self.request.query_params.get('value', None)
+        query_params = self.request.query_params
+        code = query_params.get('code', None)
+        value = query_params.get('value', None)
+        version = query_params.get('version', None)
         search_queryset = self.filter_queryset(self.queryset)
         element = search_queryset.filter(code=code, value=value)
         if not element.exists():
-            raise ValueError('Нет элемента с данным кодом и значением')
+            if version:
+                raise ValueError(f'''Нет элемента с данным кодом и значением в версии {version}''')
+            else:
+                raise ValueError('Нет элемента с данным кодом и значением')
         serializer = self.get_serializer(element[0])
         return Response(serializer.data)
