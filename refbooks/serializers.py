@@ -9,9 +9,6 @@ class RefbookSerializer(ModelSerializer):
         model = Refbook
         fields = ['id', 'code', 'name']
 
-    # def to_representation(self, instance):
-    #     result = super(RefBookSerializer, self).to_representation(instance)
-    #     return {'refbooks': [result]}
 
 class ElementRefbookSerializer(ModelSerializer):
 
