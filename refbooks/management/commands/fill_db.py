@@ -18,3 +18,4 @@ class Command(BaseCommand):
         values = [('CA01', 'Острый риносинусит'), ('CA02', 'Острый фарингит'), ('CA03', 'Острый тонзиллит')]
         for j in values:
             ElementRefbook.objects.update_or_create(version_id=version[0].id, code=j[0], value=j[1])
+        print('База заполнена')
